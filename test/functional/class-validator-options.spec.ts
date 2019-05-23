@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import {Length} from "@mardari/class-validator";
 import {JsonController} from "../../src/decorator/JsonController";
-import {createExpressServer, createKoaServer, getMetadataArgsStorage} from "../../src/index";
+import {createExpressServer, getMetadataArgsStorage} from "../../src/index";
 import {assertRequest} from "./test-utils";
 import {defaultMetadataStorage} from "class-transformer/storage";
 import {Get} from "../../src/decorator/Get";
@@ -63,13 +63,11 @@ describe("parameters auto-validation", () => {
             validation: true
         };
 
-        let expressApp: any, koaApp: any;
+        let expressApp: any;
         before(done => expressApp = createExpressServer(options).listen(3001, done));
         after(done => expressApp.close(done));
-        before(done => koaApp = createKoaServer(options).listen(3002, done));
-        after(done => koaApp.close(done));
 
-        assertRequest([3001, 3002], "get", "user?filter={\"keyword\": \"Um\", \"__somethingPrivate\": \"blablabla\"}", response => {
+        assertRequest([3001], "get", "user?filter={\"keyword\": \"Um\", \"__somethingPrivate\": \"blablabla\"}", response => {
             expect(response).to.have.status(400);
             expect(requestFilter).to.be.undefined;
         });
@@ -102,13 +100,11 @@ describe("parameters auto-validation", () => {
             }
         });
 
-        let expressApp: any, koaApp: any;
+        let expressApp: any;
         before(done => expressApp = createExpressServer().listen(3001, done));
         after(done => expressApp.close(done));
-        before(done => koaApp = createKoaServer().listen(3002, done));
-        after(done => koaApp.close(done));
 
-        assertRequest([3001, 3002], "get", "user?filter={\"keyword\": \"Um\", \"__somethingPrivate\": \"blablabla\"}", response => {
+        assertRequest([3001], "get", "user?filter={\"keyword\": \"Um\", \"__somethingPrivate\": \"blablabla\"}", response => {
             expect(response).to.have.status(400);
             expect(requestFilter).to.be.undefined;
         });
@@ -146,13 +142,11 @@ describe("parameters auto-validation", () => {
             }
         };
 
-        let expressApp: any, koaApp: any;
+        let expressApp: any;
         before(done => expressApp = createExpressServer(options).listen(3001, done));
         after(done => expressApp.close(done));
-        before(done => koaApp = createKoaServer(options).listen(3002, done));
-        after(done => koaApp.close(done));
 
-        assertRequest([3001, 3002], "get", "user?filter={\"notKeyword\": \"Um\", \"__somethingPrivate\": \"blablabla\"}", response => {
+        assertRequest([3001], "get", "user?filter={\"notKeyword\": \"Um\", \"__somethingPrivate\": \"blablabla\"}", response => {
             expect(response).to.have.status(200);
             expect(requestFilter).to.have.property("notKeyword");
         });
@@ -188,13 +182,11 @@ describe("parameters auto-validation", () => {
             validation: true
         };
 
-        let expressApp: any, koaApp: any;
+        let expressApp: any;
         before(done => expressApp = createExpressServer(options).listen(3001, done));
         after(done => expressApp.close(done));
-        before(done => koaApp = createKoaServer(options).listen(3002, done));
-        after(done => koaApp.close(done));
 
-        assertRequest([3001, 3002], "get", "user?filter={\"keyword\": \"Umedi\", \"__somethingPrivate\": \"blablabla\"}", response => {
+        assertRequest([3001], "get", "user?filter={\"keyword\": \"Umedi\", \"__somethingPrivate\": \"blablabla\"}", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql({
                 id: 1,
@@ -238,17 +230,15 @@ describe("parameters auto-validation", () => {
             validation: true
         };
 
-        let expressApp: any, koaApp: any;
+        let expressApp: any;
         before(done => expressApp = createExpressServer(options).listen(3001, done));
         after(done => expressApp.close(done));
-        before(done => koaApp = createKoaServer(options).listen(3002, done));
-        after(done => koaApp.close(done));
 
         const invalidFilter = {
             keyword: "aa"
         };
 
-        assertRequest([3001, 3002], "get", `user?filter=${JSON.stringify(invalidFilter)}`, response => {
+        assertRequest([3001], "get", `user?filter=${JSON.stringify(invalidFilter)}`, response => {
             expect(response).to.have.status(400);
             expect(response.body.paramName).to.equal("filter");
         });

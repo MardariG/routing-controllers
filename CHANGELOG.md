@@ -52,7 +52,6 @@
 
 #### Fixes
 
-- Using `@Authorization` decorator with Koa caused 404 responses (ref [#240][#240])
 - Allow throwing custom errors in `authorizationChecker` (ref [#233][#233])
 - check auth permissions before accepting files for upload (ref [#251][#251])
 
@@ -61,14 +60,13 @@
 - some routing-controllers options has been changed and renamed
 - returned validation error value signature has changed
 - controllers and middlewares now can be specified in routing-controllers options
-- `MiddlewareInterface` was removed and instead `ExpressMiddlewareInterface` or `KoaMiddlewareInterface` should be used
+- `MiddlewareInterface` was removed and instead `ExpressMiddlewareInterface` should be used
 - `ExpressErrorMiddlewareInterface` was renamed into `ErrorMiddlewareInterface`
 - per-controller and per-action middlewares used in `@UseBefore` and `@UseAfter` now should not be marked with `@Middleware` decorator
 - `@MiddlewareGlobalBefore()` and `@MiddlewareGlobalAfter()` were removed and instead new signatures should be used: `@Middleware({ type: "before" })` and `@Middleware({ type: "after" })`
 - named some decorator parameter names
 - added few new decorators to get all parameters like `@QueryParams`, `@Params`, `@HeaderParams` etc.
 - added `@Authorized` and `@CurrentUser` decorators
-- added new `@Ctx` decorator to use context with koa
 - `@NullResultCode` has been renamed to `@OnNull`, now supports error classes
 - `@UndefinedResultCode` has been renamed to `@OnUndefined`, now supports error classes
 - `@EmptyResultCode` has been removed. Use `@OnUndefined` decorator instead and return concrete types in your controllers.

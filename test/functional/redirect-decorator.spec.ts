@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import {Get} from "../../src/decorator/Get";
-import {createExpressServer, createKoaServer, getMetadataArgsStorage} from "../../src/index";
+import {createExpressServer, getMetadataArgsStorage} from "../../src/index";
 import {assertRequest} from "./test-utils";
 import {Redirect} from "../../src/decorator/Redirect";
 import {JsonController} from "../../src/decorator/JsonController";
@@ -58,29 +58,22 @@ describe("dynamic redirect", function () {
     });
     after(done => expressApp.close(done));
 
-    let koaApp: any;
-    before(done => {
-        const server = createKoaServer();
-        koaApp = server.listen(3002, done);
-    });
-    after(done => koaApp.close(done));
-
     describe("using template", () => {
-        assertRequest([3001, 3002], "get", "template", response => {
+        assertRequest([3001], "get", "template", response => {
             expect(response).to.have.status(200);
             expect(response.body).has.property("login", "pleerock");
         });
     });
 
     describe("using override", () => {
-        assertRequest([3001, 3002], "get", "override", response => {
+        assertRequest([3001], "get", "override", response => {
             expect(response).to.have.status(200);
             expect(response.body).has.property("login", "pleerock");
         });
     });
 
     describe("using original", () => {
-        assertRequest([3001, 3002], "get", "original", response => {
+        assertRequest([3001], "get", "original", response => {
             expect(response).to.have.status(200);
             expect(response.body).has.property("login", "pleerock");
         });

@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import {JsonController} from "../../src/decorator/JsonController";
-import {createExpressServer, createKoaServer, getMetadataArgsStorage} from "../../src/index";
+import {createExpressServer, getMetadataArgsStorage} from "../../src/index";
 import {assertRequest} from "./test-utils";
 import {Expose} from "class-transformer";
 import {defaultMetadataStorage} from "class-transformer/storage";
@@ -58,13 +58,11 @@ describe("class transformer options", () => {
             }
         });
 
-        let expressApp: any, koaApp: any;
+        let expressApp: any;
         before(done => expressApp = createExpressServer().listen(3001, done));
         after(done => expressApp.close(done));
-        before(done => koaApp = createKoaServer().listen(3002, done));
-        after(done => koaApp.close(done));
 
-        assertRequest([3001, 3002], "get", "user?filter={\"keyword\": \"Um\", \"__somethingPrivate\": \"blablabla\"}", response => {
+        assertRequest([3001], "get", "user?filter={\"keyword\": \"Um\", \"__somethingPrivate\": \"blablabla\"}", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql({
                 id: 1,
@@ -115,13 +113,11 @@ describe("class transformer options", () => {
             }
         };
 
-        let expressApp: any, koaApp: any;
+        let expressApp: any;
         before(done => expressApp = createExpressServer(options).listen(3001, done));
         after(done => expressApp.close(done));
-        before(done => koaApp = createKoaServer(options).listen(3002, done));
-        after(done => koaApp.close(done));
 
-        assertRequest([3001, 3002], "get", "user?filter={\"keyword\": \"Um\", \"__somethingPrivate\": \"blablabla\"}", response => {
+        assertRequest([3001], "get", "user?filter={\"keyword\": \"Um\", \"__somethingPrivate\": \"blablabla\"}", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql({
                 id: 1,
@@ -161,13 +157,11 @@ describe("class transformer options", () => {
             }
         });
 
-        let expressApp: any, koaApp: any;
+        let expressApp: any;
         before(done => expressApp = createExpressServer().listen(3001, done));
         after(done => expressApp.close(done));
-        before(done => koaApp = createKoaServer().listen(3002, done));
-        after(done => koaApp.close(done));
 
-        assertRequest([3001, 3002], "get", "user?filter={\"keyword\": \"Um\", \"__somethingPrivate\": \"blablabla\"}", response => {
+        assertRequest([3001], "get", "user?filter={\"keyword\": \"Um\", \"__somethingPrivate\": \"blablabla\"}", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql({
                 id: 1,

@@ -12,7 +12,7 @@ import {JsonController} from "../../src/decorator/JsonController";
 import {UnauthorizedError} from "../../src/http-error/UnauthorizedError";
 import {
     createExpressServer,
-    createKoaServer,
+
     getMetadataArgsStorage,
 } from "../../src/index";
 import {assertRequest} from "./test-utils";
@@ -142,14 +142,12 @@ describe("controller methods", () => {
 
     });
 
-    let expressApp: any, koaApp: any;
+    let expressApp: any;
     before(done => expressApp = createExpressServer().listen(3001, done));
     after(done => expressApp.close(done));
-    before(done => koaApp = createKoaServer().listen(3002, done));
-    after(done => koaApp.close(done));
 
     describe("get should respond with proper status code, headers and body content", () => {
-        assertRequest([3001, 3002], "get", "users", response => {
+        assertRequest([3001], "get", "users", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>All users</body></html>");
@@ -157,7 +155,7 @@ describe("controller methods", () => {
     });
 
     describe("post respond with proper status code, headers and body content", () => {
-        assertRequest([3001, 3002], "post", "users", response => {
+        assertRequest([3001], "post", "users", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>Posting user</body></html>");
@@ -165,7 +163,7 @@ describe("controller methods", () => {
     });
     
     describe("put respond with proper status code, headers and body content", () => {
-        assertRequest([3001, 3002], "put", "users", response => {
+        assertRequest([3001], "put", "users", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>Putting user</body></html>");
@@ -173,7 +171,7 @@ describe("controller methods", () => {
     });
     
     describe("patch respond with proper status code, headers and body content", () => {
-        assertRequest([3001, 3002], "patch", "users", response => {
+        assertRequest([3001], "patch", "users", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>Patching user</body></html>");
@@ -181,7 +179,7 @@ describe("controller methods", () => {
     });
     
     describe("delete respond with proper status code, headers and body content", () => {
-        assertRequest([3001, 3002], "delete", "users", response => {
+        assertRequest([3001], "delete", "users", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>Removing user</body></html>");
@@ -189,7 +187,7 @@ describe("controller methods", () => {
     });
 
     describe("head respond with proper status code, headers and body content", () => {
-        assertRequest([3001, 3002], "head", "users", response => {
+        assertRequest([3001], "head", "users", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.undefined;
@@ -197,7 +195,7 @@ describe("controller methods", () => {
     });
 
     describe("custom method (post) respond with proper status code, headers and body content", () => {
-        assertRequest([3001, 3002], "post", "categories", response => {
+        assertRequest([3001], "post", "categories", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>Posting categories</body></html>");
@@ -205,7 +203,7 @@ describe("controller methods", () => {
     });
 
     describe("custom method (delete) respond with proper status code, headers and body content", () => {
-        assertRequest([3001, 3002], "delete", "categories", response => {
+        assertRequest([3001], "delete", "categories", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>Get categories</body></html>");
@@ -213,7 +211,7 @@ describe("controller methods", () => {
     });
 
     describe("route should work with parameter", () => {
-        assertRequest([3001, 3002], "get", "users/umed", response => {
+        assertRequest([3001], "get", "users/umed", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>One user</body></html>");
@@ -221,7 +219,7 @@ describe("controller methods", () => {
     });
 
     describe("route should work with regexp parameter", () => {
-        assertRequest([3001, 3002], "get", "categories/1", response => {
+        assertRequest([3001], "get", "categories/1", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>One category</body></html>");
@@ -229,13 +227,13 @@ describe("controller methods", () => {
     });
 
     describe("should respond with 404 when regexp does not match", () => {
-        assertRequest([3001, 3002], "get", "categories/umed", response => {
+        assertRequest([3001], "get", "categories/umed", response => {
             expect(response).to.have.status(404);
         });
     });
 
     describe("route should work with string regexp parameter", () => {
-        assertRequest([3001, 3002], "get", "posts/1", response => {
+        assertRequest([3001], "get", "posts/1", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>One post</body></html>");
@@ -243,13 +241,13 @@ describe("controller methods", () => {
     });
 
     describe("should respond with 404 when regexp does not match", () => {
-        assertRequest([3001, 3002], "get", "posts/U", response => {
+        assertRequest([3001], "get", "posts/U", response => {
             expect(response).to.have.status(404);
         });
     });
 
     describe("should return result from a promise", () => {
-        assertRequest([3001, 3002], "get", "posts-from-db", response => {
+        assertRequest([3001], "get", "posts-from-db", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>resolved after half second</body></html>");
@@ -257,7 +255,7 @@ describe("controller methods", () => {
     });
 
     describe("should respond with 500 if promise failed", () => {
-        assertRequest([3001, 3002], "get", "posts-from-failed-db", response => {
+        assertRequest([3001], "get", "posts-from-failed-db", response => {
             expect(response).to.have.status(500);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>cannot connect to a database</body></html>");
@@ -265,12 +263,12 @@ describe("controller methods", () => {
     });
 
     describe("should respond with 204 No Content when null returned in action", () => {
-        assertRequest([3001, 3002], "get", "return/normal/null", response => {
+        assertRequest([3001], "get", "return/normal/null", response => {
             expect(response).to.have.status(204);
             expect(response).to.not.have.header("content-type");
             expect(response.body).to.not.exist;
         });
-        assertRequest([3001, 3002], "get", "return/json/null", response => {
+        assertRequest([3001], "get", "return/json/null", response => {
             expect(response).to.have.status(204);
             expect(response).to.not.have.header("content-type");
             expect(response.body).to.not.exist;
@@ -278,7 +276,7 @@ describe("controller methods", () => {
     });
 
     describe("should respond with 404 Not Found text when undefined returned in action", () => {
-        assertRequest([3001, 3002], "get", "return/normal/undefined", response => {
+        assertRequest([3001], "get", "return/normal/undefined", response => {
             expect(response).to.have.status(404);
             expect(response).to.have.header("content-type", (contentType: string) => {
                 expect(contentType).to.match(/text/);
@@ -287,7 +285,7 @@ describe("controller methods", () => {
     });
 
     describe("should respond with 404 Not Found JSON when undefined returned in action", () => {
-        assertRequest([3001, 3002], "get", "return/json/undefined", response => {
+        assertRequest([3001], "get", "return/json/undefined", response => {
             expect(response).to.have.status(404);
             expect(response).to.have.header("content-type", (contentType: string) => {
                 expect(contentType).to.match(/application\/json/);
@@ -296,7 +294,7 @@ describe("controller methods", () => {
     });
 
     describe("should respond with 200 and text/html even in json controller's method", () => {
-        assertRequest([3001, 3002], "get", "json-controller/text-html", response => {
+        assertRequest([3001], "get", "json-controller/text-html", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", (contentType: string) => {
                 expect(contentType).to.match(/text\/html/);
@@ -306,7 +304,7 @@ describe("controller methods", () => {
     });
 
     describe("should respond with 200 and text/plain even in json controller's method", () => {
-        assertRequest([3001, 3002], "get", "json-controller/text-plain", response => {
+        assertRequest([3001], "get", "json-controller/text-plain", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", (contentType: string) => {
                 expect(contentType).to.match(/text\/plain/);
@@ -316,7 +314,7 @@ describe("controller methods", () => {
     });
 
     describe("should respond with 401 and text/html when UnauthorizedError throwed even in json controller's method", () => {
-        assertRequest([3001, 3002], "get", "json-controller/text-plain-error", response => {
+        assertRequest([3001], "get", "json-controller/text-plain-error", response => {
             expect(response).to.have.status(401);
             expect(response).to.have.header("content-type", (contentType: string) => {
                 expect(contentType).to.match(/text\/plain/);
@@ -327,7 +325,7 @@ describe("controller methods", () => {
     });
 
     describe("should respond with 401 and aplication/json when UnauthorizedError throwed in standard json controller's method", () => {
-        assertRequest([3001, 3002], "get", "json-controller/json-error", response => {
+        assertRequest([3001], "get", "json-controller/json-error", response => {
             expect(response).to.have.status(401);
             expect(response).to.have.header("content-type", (contentType: string) => {
                 expect(contentType).to.match(/application\/json/);

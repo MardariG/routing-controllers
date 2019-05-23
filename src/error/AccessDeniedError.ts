@@ -11,7 +11,7 @@ export class AccessDeniedError extends ForbiddenError {
     constructor(action: Action) {
         super();
         Object.setPrototypeOf(this, AccessDeniedError.prototype);
-        const uri = action.request.method + " " + action.request.url; // todo: check it it works in koa
+        const uri = action.request.method + " " + action.request.url;
         this.message = `Access is denied for request on ${uri}`;
     }
 

@@ -1,7 +1,6 @@
 import {AuthorizationChecker} from "./AuthorizationChecker";
 import {ClassTransformOptions} from "class-transformer";
 import {CurrentUserChecker} from "./CurrentUserChecker";
-import { ParamOptions } from "./decorator-options/ParamOptions";
 import {ValidatorOptions} from "@mardari/class-validator";
 
 /**
@@ -11,9 +10,9 @@ export interface RoutingControllersOptions {
 
     /**
      * Indicates if cors are enabled.
-     * This requires installation of additional module (cors for express and kcors for koa).
+     * This requires installation of additional module (cors for express).
      */
-    cors?: boolean|Object;
+    cors?: boolean | Object;
 
     /**
      * Global route prefix, for example '/api'.
@@ -23,17 +22,17 @@ export interface RoutingControllersOptions {
     /**
      * List of controllers to register in the framework or directories from where to import all your controllers.
      */
-    controllers?: Function[]|string[];
+    controllers?: Function[] | string[];
 
     /**
      * List of middlewares to register in the framework or directories from where to import all your middlewares.
      */
-    middlewares?: Function[]|string[];
+    middlewares?: Function[] | string[];
 
     /**
      * List of interceptors to register in the framework or directories from where to import all your interceptors.
      */
-    interceptors?: Function[]|string[];
+    interceptors?: Function[] | string[];
 
     /**
      * Indicates if class-transformer should be used to perform serialization / deserialization.
@@ -56,7 +55,7 @@ export interface RoutingControllersOptions {
      * Indicates if class-validator should be used to auto validate objects injected into params.
      * You can also directly pass validator options to enable validator with a given options.
      */
-    validation?: boolean|ValidatorOptions;
+    validation?: boolean | ValidatorOptions;
 
     /**
      * Indicates if development mode is enabled.
@@ -85,7 +84,7 @@ export interface RoutingControllersOptions {
      * Special function used to get currently authorized user.
      */
     currentUserChecker?: CurrentUserChecker;
-    
+
     /**
      * Default settings
      */

@@ -7,7 +7,7 @@
 [![Join the chat at https://gitter.im/typestack/routing-controllers](https://badges.gitter.im/typestack/routing-controllers.svg)](https://gitter.im/typestack/routing-controllers?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Allows to create controller classes with methods as actions that handle requests.
-You can use routing-controllers with [express.js][1] or [koa.js][2].
+You can use routing-controllers with [express.js][1].
 
 # Table of Contents
 
@@ -17,7 +17,7 @@ You can use routing-controllers with [express.js][1] or [koa.js][2].
       - [Working with json](#working-with-json)
       - [Return promises](#return-promises)
       - [Using Request and Response objects](#using-request-and-response-objects)
-      - [Pre-configure express/koa](#pre-configure-expresskoa)
+      - [Pre-configure express](#pre-configure-express)
       - [Load all controllers from the given directory](#load-all-controllers-from-the-given-directory)
       - [Prefix all controllers routes](#prefix-all-controllers-routes)
       - [Prefix controller with base route](#prefix-controller-with-base-route)
@@ -45,7 +45,6 @@ You can use routing-controllers with [express.js][1] or [koa.js][2].
   * [Using middlewares](#using-middlewares)
     + [Use exist middleware](#use-exist-middleware)
     + [Creating your own express middleware](#creating-your-own-express-middleware)
-    + [Creating your own koa middleware](#creating-your-own-koa-middleware)
     + [Global middlewares](#global-middlewares)
     + [Error handlers](#error-handlers)
     + [Loading middlewares and controllers from directories](#loading-middlewares-and-controllers-from-directories)
@@ -95,14 +94,6 @@ You can use routing-controllers with [express.js][1] or [koa.js][2].
 
     `npm install @types/express @types/body-parser @types/multer --save`
 
-    **b. If you want to use routing-controllers with *koa 2*, then install it and all required dependencies:**
-
-    `npm install koa koa-router koa-bodyparser koa-multer --save`
-
-    Optionally you can also install their typings:
-
-    `npm install @types/koa @types/koa-router @types/koa-bodyparser --save`
-
 4. Its important to set these options in `tsconfig.json` file of your project:
 
     ```json
@@ -150,7 +141,7 @@ You can use routing-controllers with [express.js][1] or [koa.js][2].
     }
     ```
 
-    This class will register routes specified in method decorators in your server framework (express.js or koa).
+    This class will register routes specified in method decorators in your server framework (express.js).
 
 2. Create a file `app.ts`
 
@@ -167,8 +158,6 @@ You can use routing-controllers with [express.js][1] or [koa.js][2].
     // run express application on port 3000
     app.listen(3000);
     ```
-
-    > if you are koa user you just need to use `createKoaServer` instead of `createExpressServer`
 
 3. Open in browser `http://localhost:3000/users`. You will see `This action returns all users` in your browser.
 If you open `http://localhost:3000/users/1` you will see `This action returns user #1`.
@@ -281,9 +270,7 @@ export class UserController {
 }
 ```
 
-> note: koa users can also use `@Ctx() context` to inject koa's Context object.
-
-#### Pre-configure express/koa
+#### Pre-configure express
 
 If you have, or if you want to create and configure express app separately,
 you can use `useExpressServer` instead of `createExpressServer` function:
@@ -301,8 +288,6 @@ useExpressServer(app, { // register created express server in routing-controller
 app.listen(3000); // run your express server
 ```
 
-> koa users must use `useKoaServer` instead of `useExpressServer`
-
 #### Load all controllers from the given directory
 
 You can load all controllers from directories, by specifying array of directories in options of
@@ -316,8 +301,6 @@ createExpressServer({
     controllers: [__dirname + "/controllers/*.js"]
 }).listen(3000); // register controllers routes in our express application
 ```
-
-> koa users must use `createKoaServer` instead of `createExpressServer`
 
 #### Prefix all controllers routes
 
@@ -333,8 +316,6 @@ createExpressServer({
     controllers: [UserController]
 }).listen(3000);
 ```
-
-> koa users must use `createKoaServer` instead of `createExpressServer`
 
 #### Prefix controller with base route
 
@@ -435,7 +416,7 @@ The parameter marked with `@Session` decorator is required by default. If your a
 action(@Session("user", { required: false }) user: User)
 ```
 
-Express uses [express-session][5] / Koa uses [koa-session][6] or [koa-generic-session][7] to handle session, so firstly you have to install it manually to use `@Session` decorator.
+Express uses [express-session][5] to handle session, so firstly you have to install it manually to use `@Session` decorator.
 
 #### Inject state object
 
@@ -446,9 +427,6 @@ To inject a state parameter use `@State` decorator:
 savePost(@State("user") user: User, @Body() post: Post) {
 }
 ```
-
-If you want to inject the whole state object use `@State()` without any parameters.
-This feature is only supported by Koa.
 
 #### Inject uploaded file
 
@@ -653,9 +631,7 @@ getOne() {
 }
 ```
 
-To use rendering ability make sure to configure express / koa properly.
-To use rendering ability with Koa you will need to use a rendering 3rd party such as [koa-views](https://github.com/queckezz/koa-views/),
-koa-views is the only render middleware that has been tested.
+To use rendering ability make sure to configure express properly.
 
 #### Throw HTTP errors
 
@@ -737,7 +713,7 @@ app.listen(3000);
 ```
 
 To use cors you need to install its module.
-For express its `npm i cors`, for koa its `npm i kcors`.
+For express its `npm i cors`.
 You can pass cors options as well:
 
 ```typescript
@@ -785,7 +761,7 @@ app.listen(3000);
 
 ## Using middlewares
 
-You can use any existing express / koa middleware, or create your own.
+You can use any existing express middleware, or create your own.
 To create your middlewares there is a `@Middleware` decorator,
 and to use already exist middlewares there are `@UseBefore` and `@UseAfter` decorators.
 
@@ -905,43 +881,7 @@ Here is example of creating middleware for express.js:
     `@UseBefore` executes middleware before controller action.
     `@UseAfter` executes middleware after each controller action.
 
-### Creating your own koa middleware
-
-Here is example of creating middleware for koa.js:
-
 1. There are two ways of creating middleware:
-
-    First, you can create a simple middleware function:
-
-    ```typescript
-    export function use(context: any, next: (err?: any) => Promise<any>): Promise<any> {
-            console.log("do something before execution...");
-            return next().then(() => {
-                console.log("do something after execution");
-            }).catch(error => {
-                console.log("error handling is also here");
-            });
-        }
-    ```
-
-    Second you can create a class:
-
-    ```typescript
-    import {KoaMiddlewareInterface} from "routing-controllers";
-
-    export class MyMiddleware implements KoaMiddlewareInterface { // interface implementation is optional
-
-        use(context: any, next: (err?: any) => Promise<any>): Promise<any> {
-            console.log("do something before execution...");
-            return next().then(() => {
-                console.log("do something after execution");
-            }).catch(error => {
-                console.log("error handling is also here");
-            });
-        }
-
-    }
-    ```
 
     Then you can them this way:
 
@@ -1422,7 +1362,6 @@ export class QuestionController {
 |--------------------------------------------------------------------|--------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------|
 | `@Req()`                                                           | `getAll(@Req() request: Request)`                | Injects a Request object.                                                                                                               | `function (request, response)`            |
 | `@Res()`                                                           | `getAll(@Res() response: Response)`              | Injects a Response object.                                                                                                              | `function (request, response)`            |
-| `@Ctx()`                                                           | `getAll(@Ctx() context: Context)`                | Injects a Context object (koa-specific)                                                                                                 | `function (ctx)` (koa-analogue)           |
 | `@Param(name: string, options?: ParamOptions)`                     | `get(@Param("id") id: number)`                   | Injects a router parameter.                                                                                                             | `request.params.id`                       |
 | `@Params()`                                                        | `get(@Params() params: any)`                     | Injects all request parameters.                                                                                                         | `request.params`                          |
 | `@QueryParam(name: string, options?: ParamOptions)`                | `get(@QueryParam("id") id: number)`              | Injects a query string parameter.                                                                                                       | `request.query.id`                        |
@@ -1432,7 +1371,6 @@ export class QuestionController {
 | `@CookieParam(name: string, options?: ParamOptions)`               | `get(@CookieParam("username") username: string)` | Injects a cookie parameter.                                                                                                             | `request.cookie("username")`              |
 | `@CookieParams()`                                                  | `get(@CookieParams() params: any)`               | Injects all cookies.                                                                                                                    | `request.cookies                          |
 | `@Session(name?: string)`                                          | `get(@Session("user") user: User)`               | Injects an object from session (or the whole session).                                                                                  | `request.session.user`                    |
-| `@State(name?: string)`                                            | `get(@State() session: StateType)`               | Injects an object from the state (or the whole state).                                                                                  | `ctx.state` (koa-analogue)                |
 | `@Body(options?: BodyOptions)`                                     | `post(@Body() body: any)`                        | Injects a body. In parameter options you can specify body parser middleware options.                                                    | `request.body`                            |
 | `@BodyParam(name: string, options?: ParamOptions)`                 | `post(@BodyParam("name") name: string)`          | Injects a body parameter.                                                                                                               | `request.body.name`                       |
 | `@UploadedFile(name: string, options?: UploadOptions)`             | `post(@UploadedFile("filename") file: any)`      | Injects uploaded file from the response. In parameter options you can specify underlying uploader middleware options.                   | `request.file.file` (using multer)        |
@@ -1467,7 +1405,6 @@ export class QuestionController {
 ## Samples
 
 * Take a look on [routing-controllers with express](https://github.com/pleerock/routing-controllers-express-demo) which is using routing-controllers.
-* Take a look on [routing-controllers with koa](https://github.com/pleerock/routing-controllers-koa-demo) which is using routing-controllers.
 * Take a look on [routing-controllers with angular 2](https://github.com/pleerock/routing-controllers-angular2-demo) which is using routing-controllers.
 * Take a look on [node-microservice-demo](https://github.com/swimlane/node-microservice-demo) which is using routing-controllers.
 * Take a look on samples in [./sample](https://github.com/pleerock/routing-controllers/tree/master/sample) for more examples
@@ -1478,11 +1415,7 @@ of usage.
 See information about breaking changes and release notes [here](CHANGELOG.md).
 
 [1]: http://expressjs.com/
-[2]: http://koajs.com/
 [3]: https://github.com/expressjs/multer
 [4]: https://github.com/pleerock/class-transformer
 [5]: https://www.npmjs.com/package/express-session
-[6]: https://www.npmjs.com/package/koa-session
-[7]: https://www.npmjs.com/package/koa-generic-session
-[8]: http://koajs.com/#ctx-state
 [9]: https://github.com/pleerock/class-validator

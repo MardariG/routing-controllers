@@ -2,7 +2,7 @@ import "reflect-metadata";
 import {Controller} from "../../src/decorator/Controller";
 import {Get} from "../../src/decorator/Get";
 import {Res} from "../../src/decorator/Res";
-import {createExpressServer, createKoaServer, getMetadataArgsStorage} from "../../src/index";
+import {createExpressServer, getMetadataArgsStorage} from "../../src/index";
 import {assertRequest} from "./test-utils";
 import {Render} from "../../src/decorator/Render";
 const chakram = require("chakram");
@@ -52,18 +52,8 @@ describe("template rendering", () => {
     });
     after(done => expressApp.close(done));
 
-    let koaApp: any;
-    before(done => {
-        const path = __dirname + "/../../../../test/resources";
-        const server = createKoaServer();
-        let koaViews = require("koa-views");
-        server.use(koaViews(path, { map: { html: "handlebars" } } ));
-        koaApp = server.listen(3002, done);
-    });
-    after(done => koaApp.close(done));
-
     describe("should render a template and use given variables", () => {
-        assertRequest([3001, 3002], "get", "index", response => {
+        assertRequest([3001], "get", "index", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.contain("<html>");
             expect(response.body).to.contain("<body>");

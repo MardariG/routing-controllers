@@ -14,12 +14,6 @@ export interface Action {
     response: any;
 
     /**
-     * Content in which action is executed.
-     * Koa-specific property.
-     */
-    context?: any;
-
-    /**
      * "Next" function used to call next middleware.
      */
     next?: Function;

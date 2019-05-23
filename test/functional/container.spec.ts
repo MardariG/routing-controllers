@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import {JsonController} from "../../src/decorator/JsonController";
-import {createExpressServer, createKoaServer, getMetadataArgsStorage} from "../../src/index";
+import {createExpressServer, getMetadataArgsStorage} from "../../src/index";
 import {assertRequest} from "./test-utils";
 import {Container, Service} from "typedi";
 import {useContainer} from "../../src/container";
@@ -73,13 +73,11 @@ describe("container", () => {
             useContainer(undefined);
         });
 
-        let expressApp: any, koaApp: any;
+        let expressApp: any;
         before(done => expressApp = createExpressServer().listen(3001, done));
         after(done => expressApp.close(done));
-        before(done => koaApp = createKoaServer().listen(3002, done));
-        after(done => koaApp.close(done));
 
-        assertRequest([3001, 3002], "get", "questions", response => {
+        assertRequest([3001], "get", "questions", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql([{
                 id: 1,
@@ -90,7 +88,7 @@ describe("container", () => {
             }]);
         });
 
-        assertRequest([3001, 3002], "get", "posts", response => {
+        assertRequest([3001], "get", "posts", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql([{
                 id: 1,
@@ -179,13 +177,11 @@ describe("container", () => {
             useContainer(undefined);
         });
 
-        let expressApp: any, koaApp: any;
+        let expressApp: any;
         before(done => expressApp = createExpressServer().listen(3001, done));
         after(done => expressApp.close(done));
-        before(done => koaApp = createKoaServer().listen(3002, done));
-        after(done => koaApp.close(done));
 
-        assertRequest([3001, 3002], "get", "questions", response => {
+        assertRequest([3001], "get", "questions", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql([{
                 id: 1,
@@ -196,7 +192,7 @@ describe("container", () => {
             }]);
         });
 
-        assertRequest([3001, 3002], "get", "posts", response => {
+        assertRequest([3001], "get", "posts", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql([{
                 id: 1,
@@ -297,13 +293,11 @@ describe("container", () => {
             useContainer(undefined);
         });
 
-        let expressApp: any, koaApp: any;
+        let expressApp: any;
         before(done => expressApp = createExpressServer().listen(3001, done));
         after(done => expressApp.close(done));
-        before(done => koaApp = createKoaServer().listen(3002, done));
-        after(done => koaApp.close(done));
 
-        assertRequest([3001, 3002], "get", "questions", response => {
+        assertRequest([3001], "get", "questions", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql([{
                 id: 1,
@@ -314,7 +308,7 @@ describe("container", () => {
             }]);
         });
 
-        assertRequest([3001, 3002], "get", "posts", response => {
+        assertRequest([3001], "get", "posts", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql([{
                 id: 1,
@@ -325,7 +319,7 @@ describe("container", () => {
             }]);
         });
 
-        assertRequest([3001, 3002], "get", "photos", response => {
+        assertRequest([3001], "get", "photos", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql([{
                 id: 1,
@@ -429,13 +423,11 @@ describe("container", () => {
             useContainer(undefined);
         });
 
-        let expressApp: any, koaApp: any;
+        let expressApp: any;
         before(done => expressApp = createExpressServer().listen(3001, done));
         after(done => expressApp.close(done));
-        before(done => koaApp = createKoaServer().listen(3002, done));
-        after(done => koaApp.close(done));
 
-        assertRequest([3001, 3002], "get", "questions", response => {
+        assertRequest([3001], "get", "questions", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql([{
                 id: 1,
@@ -446,7 +438,7 @@ describe("container", () => {
             }]);
         });
 
-        assertRequest([3001, 3002], "get", "posts", response => {
+        assertRequest([3001], "get", "posts", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql([{
                 id: 1,
@@ -457,7 +449,7 @@ describe("container", () => {
             }]);
         });
 
-        assertRequest([3001, 3002], "get", "photos", response => {
+        assertRequest([3001], "get", "photos", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql([{
                 id: 1,

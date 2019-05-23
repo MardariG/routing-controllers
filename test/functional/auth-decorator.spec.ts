@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import {Get} from "../../src/decorator/Get";
-import { createExpressServer, createKoaServer, getMetadataArgsStorage, NotAcceptableError } from "../../src/index";
+import { createExpressServer, getMetadataArgsStorage, NotAcceptableError } from "../../src/index";
 import {assertRequest} from "./test-utils";
 import {JsonController} from "../../src/decorator/JsonController";
 import {Authorized} from "../../src/decorator/Authorized";
@@ -57,29 +57,22 @@ describe("Controller responds with value when Authorization succeeds (async)", f
     });
     after(done => expressApp.close(done));
 
-    let koaApp: any;
-    before(done => {
-        const server = createKoaServer(serverOptions);
-        koaApp = server.listen(3002, done);
-    });
-    after(done => koaApp.close(done));
-
     describe("without roles", () => {
-        assertRequest([3001, 3002], "get", "auth1", response => {
+        assertRequest([3001], "get", "auth1", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.eql({ test: "auth1" });
         });
     });
 
     describe("with roles", () => {
-        assertRequest([3001, 3002], "get", "auth2", response => {
+        assertRequest([3001], "get", "auth2", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.eql({ test: "auth2" });
         });
     });
 
     describe("async", () => {
-        assertRequest([3001, 3002], "get", "auth3", response => {
+        assertRequest([3001], "get", "auth3", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.eql({ test: "auth3" });
         });
@@ -132,29 +125,22 @@ describe("Controller responds with value when Authorization succeeds (sync)", fu
     });
     after(done => expressApp.close(done));
 
-    let koaApp: any;
-    before(done => {
-        const server = createKoaServer(serverOptions);
-        koaApp = server.listen(3002, done);
-    });
-    after(done => koaApp.close(done));
-
     describe("without roles", () => {
-        assertRequest([3001, 3002], "get", "auth1", response => {
+        assertRequest([3001], "get", "auth1", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.eql({ test: "auth1" });
         });
     });
 
     describe("with roles", () => {
-        assertRequest([3001, 3002], "get", "auth2", response => {
+        assertRequest([3001], "get", "auth2", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.eql({ test: "auth2" });
         });
     });
 
     describe("async", () => {
-        assertRequest([3001, 3002], "get", "auth3", response => {
+        assertRequest([3001], "get", "auth3", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.eql({ test: "auth3" });
         });
@@ -200,21 +186,14 @@ describe("Authorized Decorators Http Status Code", function () {
     });
     after(done => expressApp.close(done));
 
-    let koaApp: any;
-    before(done => {
-        const server = createKoaServer(serverOptions);
-        koaApp = server.listen(3002, done);
-    });
-    after(done => koaApp.close(done));
-
     describe("without roles", () => {
-        assertRequest([3001, 3002], "get", "auth1", response => {
+        assertRequest([3001], "get", "auth1", response => {
             expect(response).to.have.status(401);
         });
     });
 
     describe("with roles", () => {
-        assertRequest([3001, 3002], "get", "auth2", response => {
+        assertRequest([3001], "get", "auth2", response => {
             expect(response).to.have.status(403);
         });
     });
@@ -249,15 +228,10 @@ describe("Authorization checker allows to throw (async)", function() {
     });
     after(done => expressApp.close(done));
 
-    let koaApp: any;
-    before(done => {
-        const server = createKoaServer(serverOptions);
-        koaApp = server.listen(3002, done);
-    });
-    after(done => koaApp.close(done));
+
 
     describe("custom errors", () => {
-        assertRequest([3001, 3002], "get", "auth1", response => {
+        assertRequest([3001], "get", "auth1", response => {
             expect(response).to.have.status(406);
             expect(response.body).to.have.property("name", "NotAcceptableError");
             expect(response.body).to.have.property("message", "Custom Error");
@@ -293,15 +267,10 @@ describe("Authorization checker allows to throw (sync)", function() {
     });
     after(done => expressApp.close(done));
 
-    let koaApp: any;
-    before(done => {
-        const server = createKoaServer(serverOptions);
-        koaApp = server.listen(3002, done);
-    });
-    after(done => koaApp.close(done));
+
 
     describe("custom errors", () => {
-        assertRequest([3001, 3002], "get", "auth1", response => {
+        assertRequest([3001], "get", "auth1", response => {
             expect(response).to.have.status(406);
             expect(response.body).to.have.property("name", "NotAcceptableError");
             expect(response.body).to.have.property("message", "Custom Error");

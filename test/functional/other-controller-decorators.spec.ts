@@ -3,7 +3,7 @@ import {Controller} from "../../src/decorator/Controller";
 import {Get} from "../../src/decorator/Get";
 import {Param} from "../../src/decorator/Param";
 import {Post} from "../../src/decorator/Post";
-import {createExpressServer, createKoaServer, getMetadataArgsStorage, OnNull} from "../../src/index";
+import {createExpressServer, getMetadataArgsStorage, OnNull} from "../../src/index";
 import {assertRequest} from "./test-utils";
 import {HttpCode} from "../../src/decorator/HttpCode";
 import {ContentType} from "../../src/decorator/ContentType";
@@ -141,54 +141,52 @@ describe("other controller decorators", () => {
         }
     });
 
-    let expressApp: any, koaApp: any;
+    let expressApp: any;
     before(done => expressApp = createExpressServer().listen(3001, done));
     after(done => expressApp.close(done));
-    before(done => koaApp = createKoaServer().listen(3002, done));
-    after(done => koaApp.close(done));
 
     describe("should return httpCode set by @HttpCode decorator", () => {
-        assertRequest([3001, 3002], "post", "users", { name: "Umed" }, response => {
+        assertRequest([3001], "post", "users", { name: "Umed" }, response => {
             expect(response).to.have.status(201);
             expect(response.body).to.be.eql("<html><body>User has been created</body></html>");
         });
 
-        assertRequest([3001, 3002], "get", "admin", response => {
+        assertRequest([3001], "get", "admin", response => {
             expect(response).to.have.status(403);
             expect(response.body).to.be.eql("<html><body>Access is denied</body></html>");
         });
     });
 
     describe("should return custom code when @OnNull", () => {
-        assertRequest([3001, 3002], "get", "posts/1", response => {
+        assertRequest([3001], "get", "posts/1", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql("Post");
         });
-        assertRequest([3001, 3002], "get", "posts/2", response => {
+        assertRequest([3001], "get", "posts/2", response => {
             expect(response).to.have.status(200);
         });
-        assertRequest([3001, 3002], "get", "posts/3", response => {
+        assertRequest([3001], "get", "posts/3", response => {
             expect(response).to.have.status(404);
         });
-        assertRequest([3001, 3002], "get", "posts/4", response => {
+        assertRequest([3001], "get", "posts/4", response => {
             expect(response).to.have.status(404); // this is expected because for undefined 404 is given by default
         });
-        assertRequest([3001, 3002], "get", "posts/5", response => {
+        assertRequest([3001], "get", "posts/5", response => {
             expect(response).to.have.status(404); // this is expected because for undefined 404 is given by default
         });
     });
     
     describe("should return custom error message and code when @OnUndefined is used with Error class", () => {
-        assertRequest([3001, 3002], "get", "questions/1", response => {
+        assertRequest([3001], "get", "questions/1", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.equal("Question");
         });
-        assertRequest([3001, 3002], "get", "questions/2", response => {
+        assertRequest([3001], "get", "questions/2", response => {
             expect(response).to.have.status(404);
             expect(response.body.name).to.be.equal("QuestionNotFoundError");
             expect(response.body.message).to.be.equal("Question was not found!");
         });
-        assertRequest([3001, 3002], "get", "questions/3", response => {
+        assertRequest([3001], "get", "questions/3", response => {
             expect(response).to.have.status(404); // because of null
             expect(response.body.name).to.be.equal("QuestionNotFoundError");
             expect(response.body.message).to.be.equal("Question was not found!");
@@ -196,26 +194,26 @@ describe("other controller decorators", () => {
     });
 
     describe("should return custom code when @OnUndefined", () => {
-        assertRequest([3001, 3002], "get", "photos/1", response => {
+        assertRequest([3001], "get", "photos/1", response => {
             expect(response).to.have.status(200);
             expect(response.body).to.be.eql("Photo");
         });
-        assertRequest([3001, 3002], "get", "photos/2", response => {
+        assertRequest([3001], "get", "photos/2", response => {
             expect(response).to.have.status(200);
         });
-        assertRequest([3001, 3002], "get", "photos/3", response => {
+        assertRequest([3001], "get", "photos/3", response => {
             expect(response).to.have.status(204); // because of null
         });
-        assertRequest([3001, 3002], "get", "photos/4", response => {
+        assertRequest([3001], "get", "photos/4", response => {
             expect(response).to.have.status(201);
         });
-        assertRequest([3001, 3002], "get", "photos/5", response => {
+        assertRequest([3001], "get", "photos/5", response => {
             expect(response).to.have.status(201);
         });
     });
 
     describe("should return content-type in the response when @ContentType is used", () => {
-        assertRequest([3001, 3002], "get", "homepage", response => {
+        assertRequest([3001], "get", "homepage", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.eql("<html><body>Hello world</body></html>");
@@ -223,7 +221,7 @@ describe("other controller decorators", () => {
     });
 
     describe("should return content-type in the response when @ContentType is used", () => {
-        assertRequest([3001, 3002], "get", "textpage", response => {
+        assertRequest([3001], "get", "textpage", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("content-type", "text/plain; charset=utf-8");
             expect(response.body).to.be.eql("Hello text");
@@ -231,7 +229,7 @@ describe("other controller decorators", () => {
     });
 
     describe("should return response with custom headers when @Header is used", () => {
-        assertRequest([3001, 3002], "get", "userdash", response => {
+        assertRequest([3001], "get", "userdash", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("authorization", "Barer abcdefg");
             expect(response).to.have.header("development-mode", "enabled");
@@ -240,7 +238,7 @@ describe("other controller decorators", () => {
     });
 
     describe("should relocate to new location when @Location is used", () => {
-        assertRequest([3001, 3002], "get", "github", response => {
+        assertRequest([3001], "get", "github", response => {
             expect(response).to.have.status(200);
             expect(response).to.have.header("location", "http://github.com");
         });

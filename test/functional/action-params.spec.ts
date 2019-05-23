@@ -1,12 +1,11 @@
 import "reflect-metadata";
 
-import {createExpressServer, createKoaServer, getMetadataArgsStorage} from "../../src/index";
+import {createExpressServer, getMetadataArgsStorage} from "../../src/index";
 
 import {assertRequest} from "./test-utils";
 import {User} from "../fakes/global-options/User";
 import {Controller} from "../../src/decorator/Controller";
 import {Get} from "../../src/decorator/Get";
-import {Ctx} from "../../src/decorator/Ctx";
 import {Req} from "../../src/decorator/Req";
 import {Res} from "../../src/decorator/Res";
 import {Param} from "../../src/decorator/Param";
@@ -76,7 +75,6 @@ describe("action parameters", () => {
         // reset metadata args storage
         getMetadataArgsStorage().reset();
 
-        const {SetStateMiddleware} = require("../fakes/global-options/koa-middlewares/SetStateMiddleware");
         const {SessionMiddleware} = require("../fakes/global-options/SessionMiddleware");
 
         @Controller()
@@ -99,14 +97,6 @@ describe("action parameters", () => {
                     response.body = "hi, I was written directly to the response";
                     return response;
                 }
-            }
-
-            @Get("/users-direct/ctx")
-            getUsersDirectKoa(@Ctx() ctx: any): any {
-                ctx.response.status = 201;
-                ctx.response.type = "custom/x-sample; charset=utf-8";
-                ctx.response.body = "hi, I was written directly to the response using Koa Ctx";
-                return ctx;
             }
 
             @Get("/users/:userId")
@@ -163,14 +153,12 @@ describe("action parameters", () => {
             }
 
             @Get("/state")
-            @UseBefore(SetStateMiddleware)
             @ContentType("application/json")
             getState(@State() state: User) {
                 return state;
             }
 
             @Get("/state/username")
-            @UseBefore(SetStateMiddleware)
             getUsernameFromState(@State("username") username: string) {
                 return `<html><body>${username}</body></html>`;
             }
@@ -346,20 +334,14 @@ describe("action parameters", () => {
 
     });
 
-    let expressApp: any, koaApp: any;
+    let expressApp: any;
     before(done => {
         expressApp = createExpressServer().listen(3001, done);
     });
     after(done => expressApp.close(done));
-    before(done => {
-        koaApp = createKoaServer();
-        koaApp.keys = ["koa-session-secret"];
-        koaApp = koaApp.listen(3002, done);
-    });
-    after(done => koaApp.close(done));
 
     describe("@Req and @Res should be provided as Request and Response objects", () => {
-        assertRequest([3001, 3002], "get", "users", response => {
+        assertRequest([3001], "get", "users", response => {
             expect(requestReq).to.be.instanceOf(Object); // apply better check here
             expect(requestRes).to.be.instanceOf(Object); // apply better check here
             expect(response).to.be.status(200);
@@ -368,23 +350,15 @@ describe("action parameters", () => {
     });
 
     describe("writing directly to the response using @Res should work", () => {
-        assertRequest([3001, 3002], "get", "users-direct", response => {
+        assertRequest([3001], "get", "users-direct", response => {
             expect(response).to.be.status(201);
             expect(response.body).to.be.equal("hi, I was written directly to the response");
             expect(response).to.have.header("content-type", "custom/x-sample; charset=utf-8");
         });
     });
 
-    describe("writing directly to the response using @Ctx should work", () => {
-        assertRequest([3002], "get", "users-direct/ctx", response => {
-            expect(response).to.be.status(201);
-            expect(response.body).to.be.equal("hi, I was written directly to the response using Koa Ctx");
-            expect(response).to.have.header("content-type", "custom/x-sample; charset=utf-8");
-        });
-    });
-
     describe("@Param should give a param from route", () => {
-        assertRequest([3001, 3002], "get", "users/1", response => {
+        assertRequest([3001], "get", "users/1", response => {
             expect(paramUserId).to.be.equal(1);
             expect(response).to.be.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
@@ -393,7 +367,7 @@ describe("action parameters", () => {
     });
 
     describe("multiple @Param should give a proper values from route", () => {
-        assertRequest([3001, 3002], "get", "users/23/photos/32", response => {
+        assertRequest([3001], "get", "users/23/photos/32", response => {
             expect(paramFirstId).to.be.equal(23);
             expect(paramSecondId).to.be.equal(32);
             expect(response).to.be.status(200);
@@ -403,17 +377,17 @@ describe("action parameters", () => {
     });
 
     describe("@Session middleware not use", () => {
-        assertRequest([3001, 3002], "get", "not-use-session", response => {
+        assertRequest([3001], "get", "not-use-session", response => {
             expect(response).to.be.status(500);
         });
     });
 
     describe("@Session should return a value from session", () => {
-        assertRequest([3001, 3002], "post", "session", response => {
+        assertRequest([3001], "post", "session", response => {
             expect(response).to.be.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>@Session</body></html>");
-            assertRequest([3001, 3002], "get", "session", response => {
+            assertRequest([3001], "get", "session", response => {
                 expect(response).to.be.status(200);
                 expect(response).to.have.header("content-type", "text/html; charset=utf-8");
                 expect(response.body).to.be.equal("<html><body>@Session test</body></html>");
@@ -423,7 +397,7 @@ describe("action parameters", () => {
     });
 
     describe("@Session(param) should allow to inject empty property", () => {
-        assertRequest([3001, 3002], "get", "session-param-empty", response => {
+        assertRequest([3001], "get", "session-param-empty", response => {
             expect(response).to.be.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>true</body></html>");
@@ -434,7 +408,7 @@ describe("action parameters", () => {
     // TODO: uncomment this after we get rid of calling `next(err)`
 
     // describe("@Session(param) should throw required error when param is empty", () => {
-    //     assertRequest([3001, 3002], "get", "session-param-empty-error", response => {
+    //     assertRequest([3001], "get", "session-param-empty-error", response => {
     //         expect(response).to.be.status(400);
     //         // there should be a test for "ParamRequiredError" but chakram is the worst testing framework ever!!!
     //     });
@@ -447,21 +421,11 @@ describe("action parameters", () => {
         assertRequest([3001], "get", "state/username", response => {
             expect(response).to.be.status(500);
         });
-        assertRequest([3002], "get", "state", response => {
-            expect(response).to.be.status(200);
-            expect(response).to.have.header("content-type", "application/json");
-            expect(response.body.username).to.be.equal("pleerock");
-        });
-        assertRequest([3002], "get", "state/username", response => {
-            expect(response).to.be.status(200);
-            expect(response).to.have.header("content-type", "text/html; charset=utf-8");
-            expect(response.body).to.be.equal("<html><body>pleerock</body></html>");
-        });
     });
 
 
     describe("@QueryParam should give a proper values from request query parameters", () => {
-        assertRequest([3001, 3002], "get", "photos?sortBy=name&count=2&limit=10&showAll=true", response => {
+        assertRequest([3001], "get", "photos?sortBy=name&count=2&limit=10&showAll=true", response => {
             expect(queryParamSortBy).to.be.equal("name");
             expect(queryParamCount).to.be.equal("2");
             expect(queryParamLimit).to.be.equal(10);
@@ -472,29 +436,29 @@ describe("action parameters", () => {
     });
 
     describe("for @QueryParam when required is params must be provided and they should not be empty", () => {
-        assertRequest([3001, 3002], "get", "photos-with-required/?limit=0", response => {
+        assertRequest([3001], "get", "photos-with-required/?limit=0", response => {
             expect(queryParamLimit).to.be.equal(0);
             expect(response).to.be.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>0</body></html>");
         });
-        assertRequest([3001, 3002], "get", "photos-with-required/?", response => {
+        assertRequest([3001], "get", "photos-with-required/?", response => {
             expect(response).to.be.status(400);
         });
-        assertRequest([3001, 3002], "get", "photos-with-required/?limit", response => {
+        assertRequest([3001], "get", "photos-with-required/?limit", response => {
             expect(response).to.be.status(400);
         });
     });
 
     describe("for @QueryParam when the type is Date then it should be parsed", () => {
-        assertRequest([3001, 3002], "get", "posts-after/?from=2017-01-01T00:00:00Z", response => {
+        assertRequest([3001], "get", "posts-after/?from=2017-01-01T00:00:00Z", response => {
             expect(response).to.be.status(200);
             expect(response.body).to.be.equal("2017-01-01T00:00:00.000Z");
         });
     });
 
     describe("for @QueryParam when the type is Date and it is invalid then the response should be a BadRequest error", () => {
-        assertRequest([3001, 3002], "get", "posts-after/?from=InvalidDate", response => {
+        assertRequest([3001], "get", "posts-after/?from=InvalidDate", response => {
             expect(response).to.be.status(400);
             expect(response.body.name).to.be.equals("BadRequestError");
             expect(response.body.message).to.be.equals("from is invalid! It can't be parsed to date.");
@@ -502,7 +466,7 @@ describe("action parameters", () => {
     });
 
     describe("for @QueryParam when parseJson flag is used query param must be converted to object", () => {
-        assertRequest([3001, 3002], "get", "photos-with-json/?filter={\"keyword\": \"name\", \"limit\": 5}", response => {
+        assertRequest([3001], "get", "photos-with-json/?filter={\"keyword\": \"name\", \"limit\": 5}", response => {
             expect(queryParamFilter).to.be.eql({ keyword: "name", limit: 5 });
             expect(response).to.be.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
@@ -517,7 +481,7 @@ describe("action parameters", () => {
                 showAll: false
             }
         };
-        assertRequest([3001, 3002], "get", "posts", requestOptions, response => {
+        assertRequest([3001], "get", "posts", requestOptions, response => {
             expect(headerParamToken).to.be.equal("31ds31das231sad12");
             expect(headerParamCount).to.be.equal(20);
             expect(headerParamShowAll).to.be.equal(false);
@@ -537,15 +501,15 @@ describe("action parameters", () => {
                 filter: ""
             }
         };
-        assertRequest([3001, 3002], "get", "posts-with-required", validRequestOptions, response => {
+        assertRequest([3001], "get", "posts-with-required", validRequestOptions, response => {
             expect(headerParamLimit).to.be.equal(0);
             expect(response).to.be.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
         });
-        assertRequest([3001, 3002], "get", "posts-with-required", invalidRequestOptions, response => {
+        assertRequest([3001], "get", "posts-with-required", invalidRequestOptions, response => {
             expect(response).to.be.status(400);
         });
-        assertRequest([3001, 3002], "get", "posts-with-required", response => {
+        assertRequest([3001], "get", "posts-with-required", response => {
             expect(response).to.be.status(400);
         });
     });
@@ -556,7 +520,7 @@ describe("action parameters", () => {
                 filter: "{\"keyword\": \"name\", \"limit\": 5}"
             }
         };
-        assertRequest([3001, 3002], "get", "posts-with-json", requestOptions, response => {
+        assertRequest([3001], "get", "posts-with-json", requestOptions, response => {
             expect(headerParamFilter).to.be.eql({ keyword: "name", limit: 5 });
             expect(response).to.be.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
@@ -574,7 +538,7 @@ describe("action parameters", () => {
         const requestOptions = {
             jar: jar
         };
-        assertRequest([3001, 3002], "get", "questions", requestOptions, response => {
+        assertRequest([3001], "get", "questions", requestOptions, response => {
             expect(cookieParamToken).to.be.equal("31ds31das231sad12");
             expect(cookieParamCount).to.be.equal(20);
             expect(cookieParamShowAll).to.be.equal(false);
@@ -592,13 +556,13 @@ describe("action parameters", () => {
         const validRequestOptions = { jar: jar };
         const invalidRequestOptions = { jar: request.jar() };
 
-        assertRequest([3001, 3002], "get", "questions-with-required", validRequestOptions, response => {
+        assertRequest([3001], "get", "questions-with-required", validRequestOptions, response => {
             expect(cookieParamLimit).to.be.equal(20);
             expect(response).to.be.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
         });
 
-        assertRequest([3001, 3002], "get", "questions-with-required", invalidRequestOptions, response => {
+        assertRequest([3001], "get", "questions-with-required", invalidRequestOptions, response => {
             expect(response).to.be.status(400);
         });
     });
@@ -610,7 +574,7 @@ describe("action parameters", () => {
         jar.setCookie(request.cookie("filter={\"keyword\": \"name\", \"limit\": 5}"), url);
         const requestOptions = { jar: jar };
 
-        assertRequest([3001, 3002], "get", "questions-with-json", requestOptions, response => {
+        assertRequest([3001], "get", "questions-with-json", requestOptions, response => {
             expect(cookieParamFilter).to.be.eql({ keyword: "name", limit: 5 });
             expect(response).to.be.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
@@ -625,15 +589,13 @@ describe("action parameters", () => {
             json: false
         };
 
-        // todo: koa @Body with text bug. uncomment after fix https://github.com/koajs/bodyparser/issues/52
-        assertRequest([3001/*, 3002*/], "post", "questions", "hello", requestOptions, response => {
+        assertRequest([3001/**/], "post", "questions", "hello", requestOptions, response => {
             expect(body).to.be.equal("hello");
             expect(response).to.be.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
         });
     });
 
-    // todo: koa @Body with text bug. uncomment after fix https://github.com/koajs/bodyparser/issues/52
     describe("@Body should fail if required body was not provided", () => {
         const requestOptions = {
             headers: {
@@ -642,23 +604,23 @@ describe("action parameters", () => {
             json: false
         };
 
-        assertRequest([3001/*, 3002*/], "post", "questions-with-required", "0", requestOptions, response => {
+        assertRequest([3001/**/], "post", "questions-with-required", "0", requestOptions, response => {
             expect(body).to.be.equal("0");
             expect(response).to.be.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
         });
 
-        assertRequest([3001, 3002], "post", "questions-with-required", "", requestOptions, response => {
+        assertRequest([3001], "post", "questions-with-required", "", requestOptions, response => {
             expect(response).to.be.status(400);
         });
 
-        assertRequest([3001, 3002], "post", "questions-with-required", undefined, requestOptions, response => {
+        assertRequest([3001], "post", "questions-with-required", undefined, requestOptions, response => {
             expect(response).to.be.status(400);
         });
     });
 
     describe("@Body should provide a json object for json-typed controllers and actions", () => {
-        assertRequest([3001, 3002], "post", "posts", { hello: "world" }, response => {
+        assertRequest([3001], "post", "posts", { hello: "world" }, response => {
             expect(body).to.be.eql({ hello: "world" });
             expect(response).to.be.status(200);
             expect(response).to.have.header("content-type", "application/json; charset=utf-8");
@@ -667,16 +629,16 @@ describe("action parameters", () => {
     });
 
     describe("@Body should fail if required body was not provided for json-typed controllers and actions", () => {
-        assertRequest([3001, 3002], "post", "posts-with-required", { hello: "" }, response => {
+        assertRequest([3001], "post", "posts-with-required", { hello: "" }, response => {
             expect(response).to.be.status(200);
         });
-        assertRequest([3001, 3002], "post", "posts-with-required", undefined, response => {
+        assertRequest([3001], "post", "posts-with-required", undefined, response => {
             expect(response).to.be.status(400);
         });
     });
 
     describe("@BodyParam should provide a json object for json-typed controllers and actions", () => {
-        assertRequest([3001, 3002], "post", "users", { name: "johny", age: 27, isActive: true }, response => {
+        assertRequest([3001], "post", "users", { name: "johny", age: 27, isActive: true }, response => {
             expect(bodyParamName).to.be.eql("johny");
             expect(bodyParamAge).to.be.eql(27);
             expect(bodyParamIsActive).to.be.eql(true);
@@ -686,28 +648,28 @@ describe("action parameters", () => {
 
     describe("@BodyParam should fail if required body was not provided for json-typed controllers and actions", () => {
 
-        assertRequest([3001, 3002], "post", "users-with-required", { name: "johny", age: 27, isActive: true }, response => {
+        assertRequest([3001], "post", "users-with-required", { name: "johny", age: 27, isActive: true }, response => {
             expect(response).to.be.status(204);
         });
-        assertRequest([3001, 3002], "post", "users-with-required", undefined, response => {
+        assertRequest([3001], "post", "users-with-required", undefined, response => {
             expect(response).to.be.status(400);
         });
-        assertRequest([3001, 3002], "post", "users-with-required", { name: "", age: 27, isActive: false }, response => {
+        assertRequest([3001], "post", "users-with-required", { name: "", age: 27, isActive: false }, response => {
             expect(response).to.be.status(400);
         });
-        assertRequest([3001, 3002], "post", "users-with-required", { name: "Johny", age: 0, isActive: false }, response => {
+        assertRequest([3001], "post", "users-with-required", { name: "Johny", age: 0, isActive: false }, response => {
             expect(response).to.be.status(204);
         });
-        assertRequest([3001, 3002], "post", "users-with-required", { name: "Johny", age: undefined, isActive: false }, response => {
+        assertRequest([3001], "post", "users-with-required", { name: "Johny", age: undefined, isActive: false }, response => {
             expect(response).to.be.status(400);
         });
-        assertRequest([3001, 3002], "post", "users-with-required", { name: "Johny", age: 27, isActive: undefined }, response => {
+        assertRequest([3001], "post", "users-with-required", { name: "Johny", age: 27, isActive: undefined }, response => {
             expect(response).to.be.status(400);
         });
-        assertRequest([3001, 3002], "post", "users-with-required", { name: "Johny", age: 27, isActive: false }, response => {
+        assertRequest([3001], "post", "users-with-required", { name: "Johny", age: 27, isActive: false }, response => {
             expect(response).to.be.status(204);
         });
-        assertRequest([3001, 3002], "post", "users-with-required", { name: "Johny", age: 27, isActive: true }, response => {
+        assertRequest([3001], "post", "users-with-required", { name: "Johny", age: 27, isActive: true }, response => {
             expect(response).to.be.status(204);
         });
     });
@@ -725,7 +687,7 @@ describe("action parameters", () => {
             }
         };
 
-        assertRequest([3001, 3002], "post", "files", undefined, requestOptions, response => {
+        assertRequest([3001], "post", "files", undefined, requestOptions, response => {
             expect(uploadedFileName).to.be.eql("hello-world.txt");
             expect(response).to.be.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
@@ -748,7 +710,7 @@ describe("action parameters", () => {
             }
         };
 
-        assertRequest([3001, 3002], "post", "files-with-body", undefined, requestOptions, response => {
+        assertRequest([3001], "post", "files-with-body", undefined, requestOptions, response => {
             expect(response).to.be.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal(`<html><body>hello-world.txt - {"anotherField":"hi","andOther":"hello"}</body></html>`);
@@ -769,7 +731,7 @@ describe("action parameters", () => {
             }
         };
 
-        assertRequest([3001, 3002], "post", "files-with-body-param", undefined, requestOptions, response => {
+        assertRequest([3001], "post", "files-with-body-param", undefined, requestOptions, response => {
             expect(response).to.be.status(200);
             expect(response).to.have.header("content-type", "text/html; charset=utf-8");
             expect(response.body).to.be.equal("<html><body>hello-world.txt - hi, i'm a param</body></html>");
@@ -800,11 +762,11 @@ describe("action parameters", () => {
             }
         };
 
-        assertRequest([3001, 3002], "post", "files-with-limit", undefined, validRequestOptions, response => {
+        assertRequest([3001], "post", "files-with-limit", undefined, validRequestOptions, response => {
             expect(response).to.be.status(200);
         });
 
-        assertRequest([3001, 3002], "post", "files-with-limit", undefined, invalidRequestOptions, response => {
+        assertRequest([3001], "post", "files-with-limit", undefined, invalidRequestOptions, response => {
             expect(response).to.be.status(500);
         });
     });
@@ -822,11 +784,11 @@ describe("action parameters", () => {
             }
         };
 
-        assertRequest([3001, 3002], "post", "files-with-required", undefined, requestOptions, response => {
+        assertRequest([3001], "post", "files-with-required", undefined, requestOptions, response => {
             expect(response).to.be.status(200);
         });
 
-        assertRequest([3001, 3002], "post", "files-with-required", undefined, {}, response => {
+        assertRequest([3001], "post", "files-with-required", undefined, {}, response => {
             expect(response).to.be.status(400);
         });
     });
@@ -850,7 +812,7 @@ describe("action parameters", () => {
             }
         };
 
-        assertRequest([3001, 3002], "post", "photos", undefined, requestOptions, response => {
+        assertRequest([3001], "post", "photos", undefined, requestOptions, response => {
             expect(uploadedFilesFirstName).to.be.eql("me.jpg");
             expect(uploadedFilesSecondName).to.be.eql("she.jpg");
             expect(response).to.be.status(200);
@@ -889,10 +851,10 @@ describe("action parameters", () => {
             }
         };
 
-        assertRequest([3001, 3002], "post", "photos-with-limit", undefined, validRequestOptions, response => {
+        assertRequest([3001], "post", "photos-with-limit", undefined, validRequestOptions, response => {
             expect(response).to.be.status(200);
         });
-        assertRequest([3001, 3002], "post", "photos-with-limit", undefined, invalidRequestOptions, response => {
+        assertRequest([3001], "post", "photos-with-limit", undefined, invalidRequestOptions, response => {
             expect(response).to.be.status(500);
         });
     });
@@ -916,10 +878,10 @@ describe("action parameters", () => {
             }
         };
 
-        assertRequest([3001, 3002], "post", "photos-with-required", undefined, requestOptions, response => {
+        assertRequest([3001], "post", "photos-with-required", undefined, requestOptions, response => {
             expect(response).to.be.status(200);
         });
-        assertRequest([3001, 3002], "post", "photos-with-required", undefined, {}, response => {
+        assertRequest([3001], "post", "photos-with-required", undefined, {}, response => {
             expect(response).to.be.status(400);
         });
 

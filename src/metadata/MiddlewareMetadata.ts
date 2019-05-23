@@ -2,7 +2,6 @@ import {MiddlewareMetadataArgs} from "./args/MiddlewareMetadataArgs";
 import {ExpressMiddlewareInterface} from "../driver/express/ExpressMiddlewareInterface";
 import {ExpressErrorMiddlewareInterface} from "../driver/express/ExpressErrorMiddlewareInterface";
 import {getFromContainer} from "../container";
-import {KoaMiddlewareInterface} from "../driver/koa/KoaMiddlewareInterface";
 
 /**
  * Middleware metadata.
@@ -51,8 +50,8 @@ export class MiddlewareMetadata {
     /**
      * Gets middleware instance from the container.
      */
-    get instance(): ExpressMiddlewareInterface|KoaMiddlewareInterface|ExpressErrorMiddlewareInterface {
-        return getFromContainer<ExpressMiddlewareInterface|KoaMiddlewareInterface|ExpressErrorMiddlewareInterface>(this.target);
+    get instance(): ExpressMiddlewareInterface|ExpressErrorMiddlewareInterface {
+        return getFromContainer<ExpressMiddlewareInterface|ExpressErrorMiddlewareInterface>(this.target);
     }
     
 }

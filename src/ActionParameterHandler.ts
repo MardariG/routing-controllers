@@ -37,9 +37,6 @@ export class ActionParameterHandler<T extends BaseDriver> {
         if (param.type === "response")
             return action.response;
 
-        if (param.type === "context")
-            return action.context;
-
         // get parameter value from request and normalize it
         const value = this.normalizeParamValue(this.driver.getParamFromRequest(action, param), param);
         if (isPromiseLike(value))
