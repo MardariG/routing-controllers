@@ -1,7 +1,7 @@
 {
   "name": "@mardari/routing-controllers",
   "private": false,
-  "version": "0.7.9",
+  "version": "0.7.16",
   "description": "Create structured, declarative and beautifully organized class-based controllers with heavy decorators usage for Express / Koa using TypeScript.",
   "license": "MIT",
   "readmeFilename": "README.md",
@@ -34,7 +34,7 @@
   ],
   "dependencies": {
     "class-transformer": "^0.1.9",
-    "class-validator": "0.9.1",
+    "@mardari/class-validator": "^0.9.1",
     "cookie": "^0.3.1",
     "glob": "^7.1.2",
     "reflect-metadata": "^0.1.12",
@@ -90,7 +90,8 @@
     "typescript": "~2.7.2"
   },
   "scripts": {
-    "test": "cross-env NODE_ENV=test gulp tests"
+    "test": "cross-env NODE_ENV=test gulp tests",
+    "build": "gulp package"
   },
   "typings": "index.d.ts"
 }

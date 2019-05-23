@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import {Length} from "class-validator";
+import {Length} from "@mardari/class-validator";
 import {JsonController} from "../../src/decorator/JsonController";
 import {createExpressServer, createKoaServer, getMetadataArgsStorage} from "../../src/index";
 import {assertRequest} from "./test-utils";

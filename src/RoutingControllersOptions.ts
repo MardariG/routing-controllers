@@ -2,7 +2,7 @@ import {AuthorizationChecker} from "./AuthorizationChecker";
 import {ClassTransformOptions} from "class-transformer";
 import {CurrentUserChecker} from "./CurrentUserChecker";
 import { ParamOptions } from "./decorator-options/ParamOptions";
-import {ValidatorOptions} from "class-validator";
+import {ValidatorOptions} from "@mardari/class-validator";
 
 /**
  * Routing controller initialization options.
